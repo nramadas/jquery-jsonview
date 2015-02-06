@@ -135,34 +135,33 @@ Licensed under the MIT License.
   Collapser = (function() {
     function Collapser() {}
 
-    Collapser.bindEvent = function(item, collapsed) {
+    Collapser.bindEvent = function(item, options) {
       var collapser;
+      this.options = options;
       collapser = document.createElement('div');
       collapser.className = 'collapser';
-      collapser.innerHTML = collapsed ? '+' : '-';
+      collapser.innerHTML = this.options.collapsed ? '+' : '-';
       collapser.addEventListener('click', (function(_this) {
         return function(event) {
           return _this.toggle(event.target);
         };
       })(this));
       item.insertBefore(collapser, item.firstChild);
-      if (collapsed) {
-        return this.collapse(collapser);
+      if (this.options.collapsed) {
+        return this.collapse(collapser, this.collapseTargets(collapser)[0]);
       }
     };
 
-    Collapser.expand = function(collapser) {
-      var ellipsis, target;
-      target = this.collapseTarget(collapser);
+    Collapser.expand = function(collapser, target) {
+      var ellipsis;
       ellipsis = target.parentNode.getElementsByClassName('ellipsis')[0];
       target.parentNode.removeChild(ellipsis);
       target.style.display = '';
       return collapser.innerHTML = '-';
     };
 
-    Collapser.collapse = function(collapser) {
-      var ellipsis, target;
-      target = this.collapseTarget(collapser);
+    Collapser.collapse = function(collapser, target) {
+      var ellipsis;
       target.style.display = 'none';
       ellipsis = document.createElement('span');
       ellipsis.className = 'ellipsis';
@@ -171,23 +170,36 @@ Licensed under the MIT License.
       return collapser.innerHTML = '+';
     };
 
+    Collapser.doToggle = function(collapser, target) {};
+
     Collapser.toggle = function(collapser) {
-      var target;
-      target = this.collapseTarget(collapser);
-      if (target.style.display === 'none') {
-        return this.expand(collapser);
+      var action, collapsers, index, targets, _, _i, _len, _results;
+      targets = this.collapseTargets(collapser);
+      if (targets[0].style.display === 'none') {
+        action = 'expand';
       } else {
-        return this.collapse(collapser);
+        action = 'collapse';
+      }
+      if (this.options.recursive_collapser) {
+        collapsers = collapser.parentNode.getElementsByClassName('collapser');
+        _results = [];
+        for (index = _i = 0, _len = collapsers.length; _i < _len; index = ++_i) {
+          _ = collapsers[index];
+          _results.push(this[action](collapsers[index], targets[index]));
+        }
+        return _results;
+      } else {
+        return this[action](collapser, targets[0]);
       }
     };
 
-    Collapser.collapseTarget = function(collapser) {
-      var target, targets;
+    Collapser.collapseTargets = function(collapser) {
+      var targets;
       targets = collapser.parentNode.getElementsByClassName('collapsible');
       if (!targets.length) {
         return;
       }
-      return target = targets[0];
+      return targets;
     };
 
     return Collapser;
@@ -232,8 +244,9 @@ Licensed under the MIT License.
       json = args[0];
       options = args[1] || {};
       defaultOptions = {
+        nl2br: false,
         collapsed: false,
-        nl2br: false
+        recursive_collapser: false
       };
       options = $.extend(defaultOptions, options);
       formatter = new JSONFormatter({
@@ -252,7 +265,7 @@ Licensed under the MIT License.
         for (_i = 0, _len = items.length; _i < _len; _i++) {
           item = items[_i];
           if (item.parentNode.nodeName === 'LI') {
-            _results.push(Collapser.bindEvent(item.parentNode, options.collapsed));
+            _results.push(Collapser.bindEvent(item.parentNode, options));
           } else {
             _results.push(void 0);
           }
