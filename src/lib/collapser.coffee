@@ -11,12 +11,14 @@ class Collapser
     @collapse(collapser, @collapseTargets(collapser)[0]) if @options.collapsed
 
   @expand: (collapser, target) ->
+    return unless @isCollapsed(target)
     ellipsis = target.parentNode.getElementsByClassName('ellipsis')[0]
     target.parentNode.removeChild(ellipsis)
     target.style.display = ''
     collapser.innerHTML = '-'
 
   @collapse: (collapser, target) ->
+    return if @isCollapsed(target)
     target.style.display = 'none'
     ellipsis = document.createElement('span')
     ellipsis.className = 'ellipsis'
@@ -24,15 +26,10 @@ class Collapser
     target.parentNode.insertBefore(ellipsis, target)
     collapser.innerHTML = '+'
 
-  @doToggle: (collapser, target) ->
-
   @toggle: (collapser) ->
     targets = @collapseTargets(collapser)
 
-    if targets[0].style.display == 'none'
-      action = 'expand'
-    else
-      action = 'collapse'
+    action = if @isCollapsed(targets[0]) then 'expand' else 'collapse'
 
     if @options.recursive_collapser
       collapsers = collapser.parentNode.getElementsByClassName('collapser')
@@ -45,4 +42,7 @@ class Collapser
     targets = collapser.parentNode.getElementsByClassName('collapsible')
     return unless targets.length
     targets
+
+  @isCollapsed: (target) ->
+    target.style.display == 'none'
 

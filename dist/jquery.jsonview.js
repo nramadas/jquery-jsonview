@@ -154,6 +154,9 @@ Licensed under the MIT License.
 
     Collapser.expand = function(collapser, target) {
       var ellipsis;
+      if (!this.isCollapsed(target)) {
+        return;
+      }
       ellipsis = target.parentNode.getElementsByClassName('ellipsis')[0];
       target.parentNode.removeChild(ellipsis);
       target.style.display = '';
@@ -162,6 +165,9 @@ Licensed under the MIT License.
 
     Collapser.collapse = function(collapser, target) {
       var ellipsis;
+      if (this.isCollapsed(target)) {
+        return;
+      }
       target.style.display = 'none';
       ellipsis = document.createElement('span');
       ellipsis.className = 'ellipsis';
@@ -170,16 +176,10 @@ Licensed under the MIT License.
       return collapser.innerHTML = '+';
     };
 
-    Collapser.doToggle = function(collapser, target) {};
-
     Collapser.toggle = function(collapser) {
       var action, collapsers, index, targets, _, _i, _len, _results;
       targets = this.collapseTargets(collapser);
-      if (targets[0].style.display === 'none') {
-        action = 'expand';
-      } else {
-        action = 'collapse';
-      }
+      action = this.isCollapsed(targets[0]) ? 'expand' : 'collapse';
       if (this.options.recursive_collapser) {
         collapsers = collapser.parentNode.getElementsByClassName('collapser');
         _results = [];
@@ -200,6 +200,10 @@ Licensed under the MIT License.
         return;
       }
       return targets;
+    };
+
+    Collapser.isCollapsed = function(target) {
+      return target.style.display === 'none';
     };
 
     return Collapser;
