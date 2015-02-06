@@ -30,7 +30,7 @@ jQuery JSONView can be configured using the following options.
 
 ### API
 
-jQuery JSONView provide following methods to allow you control json nodes, all methods below accept a level argument to perform action on the specify node.
+jQuery JSONView provide following methods to allow you control JSON nodes, all methods below accept a level argument to perform action on the specify node.
 
 * `jQuery#JSONView('collapse', [level])` - Collapse nodes.
 * `jQuery#JSONView('expand', [level])` - Expand nodes.
